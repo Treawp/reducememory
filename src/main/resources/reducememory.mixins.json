@@ -1,0 +1,16 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "dev.gazcc.reducememory.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "client": [
+    "ParticleManagerMixin",
+    "WorldRendererMixin",
+    "EntityRendererMixin",
+    "ClientChunkManagerMixin",
+    "MinecraftClientMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
