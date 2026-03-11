@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "id": "reducememory",
+  "version": "${version}",
+  "name": "ReduceMemory",
+  "description": "Optimizes memory usage for low-end devices.",
+  "authors": ["Gazcc"],
+  "license": "MIT",
+  "environment": "client",
+  "entrypoints": {
+    "client": [
+      "dev.gazcc.reducememory.ReduceMemoryMod"
+    ]
+  },
+  "mixins": [
+    "reducememory.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.15.0",
+    "fabric-api": "*",
+    "minecraft": "~1.21.11"
+  }
+}
