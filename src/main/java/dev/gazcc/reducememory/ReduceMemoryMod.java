@@ -16,7 +16,6 @@ public class ReduceMemoryMod implements ClientModInitializer {
     private int gcCounter = 0;
     private int bgCounter = 0;
     private int chunkCounter = 0;
-    private int originalFps = -1;
 
     @Override
     public void onInitializeClient() {
@@ -26,7 +25,6 @@ public class ReduceMemoryMod implements ClientModInitializer {
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
 
-            // === AUTO GC ===
             if (config.enableAutoGC) {
                 tickCounter++;
                 if (tickCounter >= config.gcIntervalSeconds * 20) {
@@ -40,7 +38,6 @@ public class ReduceMemoryMod implements ClientModInitializer {
                 }
             }
 
-            // === GC ON LOW MEMORY ===
             if (config.gcOnLowMemory) {
                 gcCounter++;
                 if (gcCounter >= 100) {
@@ -54,7 +51,6 @@ public class ReduceMemoryMod implements ClientModInitializer {
                 }
             }
 
-            // === REDUCE CPU LOAD ===
             if (config.reduceCpuLoad) {
                 bgCounter++;
                 if (bgCounter >= 5) {
@@ -63,25 +59,6 @@ public class ReduceMemoryMod implements ClientModInitializer {
                 }
             }
 
-            // === REDUCE GPU LOAD - limit FPS saat background ===
-            if (config.reduceGpuLoad && client.options != null) {
-                boolean focused = client.isWindowFocused();
-                if (!focused) {
-                    if (originalFps == -1) {
-                        originalFps = client.options.getMaxFps();
-                    }
-                    if (client.options.getMaxFps() > config.maxFpsOnBackground) {
-                        client.options.maxFps.setValue(config.maxFpsOnBackground);
-                    }
-                } else {
-                    if (originalFps != -1) {
-                        client.options.maxFps.setValue(originalFps);
-                        originalFps = -1;
-                    }
-                }
-            }
-
-            // === IMPROVE CHUNK LOADING ===
             if (config.improveChunkLoading) {
                 chunkCounter++;
                 if (chunkCounter >= config.maxChunkUpdatesPerTick) {
@@ -99,4 +76,4 @@ public class ReduceMemoryMod implements ClientModInitializer {
     public static ModConfig getConfig() {
         return config;
     }
-                            }
+                                                  }
