@@ -1,0 +1,12 @@
+{
+  "text.autoconfig.reducememory.title": "ReduceMemory Settings",
+  "text.autoconfig.reducememory.option.enableAutoGC": "Enable Auto GC",
+  "text.autoconfig.reducememory.option.gcIntervalSeconds": "GC Interval (seconds)",
+  "text.autoconfig.reducememory.option.gcThresholdPercent": "GC Threshold (%)",
+  "text.autoconfig.reducememory.option.gcOnDisconnect": "GC on Disconnect",
+  "text.autoconfig.reducememory.option.showGCNotification": "Show GC Notification",
+  "text.autoconfig.reducememory.option.reduceCpuLoad": "Reduce CPU Load",
+  "text.autoconfig.reducememory.option.reduceGpuLoad": "Reduce GPU Load",
+  "text.autoconfig.reducememory.option.maxFpsOnBackground": "Max FPS when Tabbed Out",
+  "text.autoconfig.reducememory.option.entityCulling": "Entity Culling"
+}
