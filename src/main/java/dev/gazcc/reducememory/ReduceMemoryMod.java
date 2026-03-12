@@ -4,8 +4,6 @@ import me.shedaniel.autoconfig.AutoConfig;
 import me.shedaniel.autoconfig.serializer.GsonConfigSerializer;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.world.ClientWorld;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -76,20 +74,16 @@ public class ReduceMemoryMod implements ClientModInitializer {
                 }
             }
 
-            // === IMPROVE CHUNK LOADING - throttle chunk updates ===
+            // === IMPROVE CHUNK LOADING ===
             if (config.improveChunkLoading) {
                 chunkCounter++;
                 if (chunkCounter >= config.maxChunkUpdatesPerTick) {
                     chunkCounter = 0;
-                    ClientWorld world = client.world;
-                    if (world != null) {
-                        // Hint JVM to collect chunk-related garbage
-                        Runtime r = Runtime.getRuntime();
-                        long used = r.totalMemory() - r.freeMemory();
-                        long max = r.maxMemory();
-                        if ((double) used / max > 0.75) {
-                            System.gc();
-                        }
+                    Runtime r = Runtime.getRuntime();
+                    long used = r.totalMemory() - r.freeMemory();
+                    long max = r.maxMemory();
+                    if ((double) used / max > 0.75) {
+                        System.gc();
                     }
                 }
             }
@@ -98,5 +92,4 @@ public class ReduceMemoryMod implements ClientModInitializer {
 
     public static ModConfig getConfig() {
         return config;
-    }
             }
