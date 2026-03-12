@@ -14,7 +14,6 @@ public class ReduceMemoryMod implements ClientModInitializer {
     private static ModConfig config;
     private int tickCounter = 0;
     private int bgCounter = 0;
-    private boolean wasBackground = false;
 
     @Override
     public void onInitializeClient() {
@@ -45,19 +44,14 @@ public class ReduceMemoryMod implements ClientModInitializer {
                 }
             }
 
-            // === REDUCE CPU + GPU LOAD saat background ===
-            boolean isBackground = client.window != null && !client.isWindowFocused();
-
-            if ((config.reduceCpuLoad || config.reduceGpuLoad) && isBackground) {
+            // === REDUCE CPU LOAD saat background ===
+            if (config.reduceCpuLoad) {
                 bgCounter++;
                 if (bgCounter >= 5) {
                     bgCounter = 0;
                     try {
-                        Thread.sleep(config.reduceCpuLoad ? 50 : 10);
+                        Thread.sleep(50);
                     } catch (InterruptedException ignored) {}
-                }
-                if (config.reduceGpuLoad && client.options != null) {
-                    client.options.maxFps.setValue(config.maxFpsOnBackground);
                 }
             }
         });
@@ -66,4 +60,4 @@ public class ReduceMemoryMod implements ClientModInitializer {
     public static ModConfig getConfig() {
         return config;
     }
-        }
+                    }
