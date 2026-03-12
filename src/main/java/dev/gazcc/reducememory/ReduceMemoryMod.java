@@ -4,7 +4,6 @@ import me.shedaniel.autoconfig.AutoConfig;
 import me.shedaniel.autoconfig.serializer.GsonConfigSerializer;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,7 +13,8 @@ public class ReduceMemoryMod implements ClientModInitializer {
     public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
     private static ModConfig config;
     private int tickCounter = 0;
-    private int fpsLimitCounter = 0;
+    private int bgCounter = 0;
+    private boolean wasBackground = false;
 
     @Override
     public void onInitializeClient() {
@@ -23,6 +23,7 @@ public class ReduceMemoryMod implements ClientModInitializer {
         LOGGER.info("[ReduceMemory] v2.0.0 Active.");
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
+
             // === AUTO GC ===
             if (config.enableAutoGC) {
                 tickCounter++;
@@ -44,25 +45,19 @@ public class ReduceMemoryMod implements ClientModInitializer {
                 }
             }
 
-            // === REDUCE CPU LOAD - limit FPS saat game di background ===
-            if (config.reduceCpuLoad && client.isWindowFocused() == false) {
-                fpsLimitCounter++;
-                if (fpsLimitCounter >= 20) {
-                    fpsLimitCounter = 0;
+            // === REDUCE CPU + GPU LOAD saat background ===
+            boolean isBackground = client.window != null && !client.isWindowFocused();
+
+            if ((config.reduceCpuLoad || config.reduceGpuLoad) && isBackground) {
+                bgCounter++;
+                if (bgCounter >= 5) {
+                    bgCounter = 0;
                     try {
-                        // Sleep 50ms setiap 20 tick saat unfocused = kurangi CPU usage
-                        Thread.sleep(50);
+                        Thread.sleep(config.reduceCpuLoad ? 50 : 10);
                     } catch (InterruptedException ignored) {}
                 }
-            } else {
-                fpsLimitCounter = 0;
-            }
-
-            // === REDUCE GPU LOAD - paksa limit FPS saat background ===
-            if (config.reduceGpuLoad && client.isWindowFocused() == false) {
-                if (client.options != null) {
-                    // Simpan FPS limit asli dan paksa rendah saat background
-                    client.options.maxFps().setValue(config.maxFpsOnBackground);
+                if (config.reduceGpuLoad && client.options != null) {
+                    client.options.maxFps.setValue(config.maxFpsOnBackground);
                 }
             }
         });
@@ -71,4 +66,4 @@ public class ReduceMemoryMod implements ClientModInitializer {
     public static ModConfig getConfig() {
         return config;
     }
-                    }
+        }
