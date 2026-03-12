@@ -1,6 +1,5 @@
 package dev.gazcc.reducememory;
 
-import me.shedaniel.autoconfig.AutoConfig;
 import me.shedaniel.autoconfig.ConfigData;
 import me.shedaniel.autoconfig.annotation.Config;
 import me.shedaniel.autoconfig.annotation.ConfigEntry;
@@ -28,4 +27,17 @@ public class ModConfig implements ConfigData {
     public int maxFpsOnBackground = 10;
 
     public boolean entityCulling = true;
+
+    // Anti lag features
+    public boolean improveChunkLoading = true;
+
+    @ConfigEntry.BoundedDiscrete(min = 2, max = 16)
+    public int maxChunkUpdatesPerTick = 4;
+
+    public boolean reduceParticles = true;
+
+    public boolean gcOnLowMemory = true;
+
+    @ConfigEntry.BoundedDiscrete(min = 10, max = 90)
+    public int lowMemoryThreshold = 85;
 }
