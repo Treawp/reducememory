@@ -16,6 +16,7 @@ public class ReduceMemoryMod implements ClientModInitializer {
     private int gcCounter = 0;
     private int bgCounter = 0;
     private int chunkCounter = 0;
+    private int originalFps = -1;
 
     @Override
     public void onInitializeClient() {
@@ -28,19 +29,12 @@ public class ReduceMemoryMod implements ClientModInitializer {
             // === AUTO GC ===
             if (config.enableAutoGC) {
                 tickCounter++;
-                int intervalTicks = config.gcIntervalSeconds * 20;
-                if (tickCounter >= intervalTicks) {
+                if (tickCounter >= config.gcIntervalSeconds * 20) {
                     tickCounter = 0;
                     Runtime r = Runtime.getRuntime();
-                    long max = r.maxMemory();
-                    long used = r.totalMemory() - r.freeMemory();
-                    double ratio = (double) used / max;
-                    double threshold = config.gcThresholdPercent / 100.0;
-                    if (ratio >= threshold) {
-                        long usedMB = used / (1024 * 1024);
-                        long maxMB = max / (1024 * 1024);
-                        LOGGER.info("[ReduceMemory] GC triggered - {}MB/{}MB ({}%)",
-                            usedMB, maxMB, (int)(ratio * 100));
+                    double ratio = (double)(r.totalMemory() - r.freeMemory()) / r.maxMemory();
+                    if (ratio >= config.gcThresholdPercent / 100.0) {
+                        LOGGER.info("[ReduceMemory] GC - {}%", (int)(ratio * 100));
                         System.gc();
                     }
                 }
@@ -52,11 +46,8 @@ public class ReduceMemoryMod implements ClientModInitializer {
                 if (gcCounter >= 100) {
                     gcCounter = 0;
                     Runtime r = Runtime.getRuntime();
-                    long max = r.maxMemory();
-                    long used = r.totalMemory() - r.freeMemory();
-                    double ratio = (double) used / max * 100;
+                    double ratio = (double)(r.totalMemory() - r.freeMemory()) / r.maxMemory() * 100;
                     if (ratio >= config.lowMemoryThreshold) {
-                        LOGGER.info("[ReduceMemory] Low memory GC! {}%", (int)ratio);
                         System.gc();
                         System.gc();
                     }
@@ -68,9 +59,25 @@ public class ReduceMemoryMod implements ClientModInitializer {
                 bgCounter++;
                 if (bgCounter >= 5) {
                     bgCounter = 0;
-                    try {
-                        Thread.sleep(10);
-                    } catch (InterruptedException ignored) {}
+                    try { Thread.sleep(10); } catch (InterruptedException ignored) {}
+                }
+            }
+
+            // === REDUCE GPU LOAD - limit FPS saat background ===
+            if (config.reduceGpuLoad && client.options != null) {
+                boolean focused = client.isWindowFocused();
+                if (!focused) {
+                    if (originalFps == -1) {
+                        originalFps = client.options.getMaxFps();
+                    }
+                    if (client.options.getMaxFps() > config.maxFpsOnBackground) {
+                        client.options.maxFps.setValue(config.maxFpsOnBackground);
+                    }
+                } else {
+                    if (originalFps != -1) {
+                        client.options.maxFps.setValue(originalFps);
+                        originalFps = -1;
+                    }
                 }
             }
 
@@ -80,16 +87,16 @@ public class ReduceMemoryMod implements ClientModInitializer {
                 if (chunkCounter >= config.maxChunkUpdatesPerTick) {
                     chunkCounter = 0;
                     Runtime r = Runtime.getRuntime();
-                    long used = r.totalMemory() - r.freeMemory();
-                    long max = r.maxMemory();
-                    if ((double) used / max > 0.75) {
+                    if ((double)(r.totalMemory() - r.freeMemory()) / r.maxMemory() > 0.75) {
                         System.gc();
                     }
                 }
             }
+
         });
     }
 
     public static ModConfig getConfig() {
         return config;
-            }
+    }
+                            }
