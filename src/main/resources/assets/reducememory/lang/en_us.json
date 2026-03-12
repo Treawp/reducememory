@@ -8,5 +8,10 @@
   "text.autoconfig.reducememory.option.reduceCpuLoad": "Reduce CPU Load",
   "text.autoconfig.reducememory.option.reduceGpuLoad": "Reduce GPU Load",
   "text.autoconfig.reducememory.option.maxFpsOnBackground": "Max FPS when Tabbed Out",
-  "text.autoconfig.reducememory.option.entityCulling": "Entity Culling"
+  "text.autoconfig.reducememory.option.entityCulling": "Entity Culling",
+  "text.autoconfig.reducememory.option.improveChunkLoading": "Improve Chunk Loading",
+  "text.autoconfig.reducememory.option.maxChunkUpdatesPerTick": "Max Chunk Updates Per Tick",
+  "text.autoconfig.reducememory.option.reduceParticles": "Reduce Particles",
+  "text.autoconfig.reducememory.option.gcOnLowMemory": "GC on Low Memory",
+  "text.autoconfig.reducememory.option.lowMemoryThreshold": "Low Memory Threshold (%)"
 }
