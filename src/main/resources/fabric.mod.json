@@ -10,6 +10,9 @@
   "entrypoints": {
     "client": [
       "dev.gazcc.reducememory.ReduceMemoryMod"
+    ],
+    "modmenu": [
+      "dev.gazcc.reducememory.ModMenuIntegration"
     ]
   },
   "mixins": [
@@ -18,6 +21,7 @@
   "depends": {
     "fabricloader": ">=0.15.0",
     "fabric-api": "*",
-    "minecraft": "~1.21.11"
+    "minecraft": "~1.21.11",
+    "cloth-config": "*"
   }
 }
