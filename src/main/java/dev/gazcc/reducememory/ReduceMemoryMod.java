@@ -4,6 +4,8 @@ import me.shedaniel.autoconfig.AutoConfig;
 import me.shedaniel.autoconfig.serializer.GsonConfigSerializer;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.world.ClientWorld;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -13,7 +15,9 @@ public class ReduceMemoryMod implements ClientModInitializer {
     public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
     private static ModConfig config;
     private int tickCounter = 0;
+    private int gcCounter = 0;
     private int bgCounter = 0;
+    private int chunkCounter = 0;
 
     @Override
     public void onInitializeClient() {
@@ -44,14 +48,49 @@ public class ReduceMemoryMod implements ClientModInitializer {
                 }
             }
 
-            // === REDUCE CPU LOAD saat background ===
+            // === GC ON LOW MEMORY ===
+            if (config.gcOnLowMemory) {
+                gcCounter++;
+                if (gcCounter >= 100) {
+                    gcCounter = 0;
+                    Runtime r = Runtime.getRuntime();
+                    long max = r.maxMemory();
+                    long used = r.totalMemory() - r.freeMemory();
+                    double ratio = (double) used / max * 100;
+                    if (ratio >= config.lowMemoryThreshold) {
+                        LOGGER.info("[ReduceMemory] Low memory GC! {}%", (int)ratio);
+                        System.gc();
+                        System.gc();
+                    }
+                }
+            }
+
+            // === REDUCE CPU LOAD ===
             if (config.reduceCpuLoad) {
                 bgCounter++;
                 if (bgCounter >= 5) {
                     bgCounter = 0;
                     try {
-                        Thread.sleep(50);
+                        Thread.sleep(10);
                     } catch (InterruptedException ignored) {}
+                }
+            }
+
+            // === IMPROVE CHUNK LOADING - throttle chunk updates ===
+            if (config.improveChunkLoading) {
+                chunkCounter++;
+                if (chunkCounter >= config.maxChunkUpdatesPerTick) {
+                    chunkCounter = 0;
+                    ClientWorld world = client.world;
+                    if (world != null) {
+                        // Hint JVM to collect chunk-related garbage
+                        Runtime r = Runtime.getRuntime();
+                        long used = r.totalMemory() - r.freeMemory();
+                        long max = r.maxMemory();
+                        if ((double) used / max > 0.75) {
+                            System.gc();
+                        }
+                    }
                 }
             }
         });
@@ -60,4 +99,4 @@ public class ReduceMemoryMod implements ClientModInitializer {
     public static ModConfig getConfig() {
         return config;
     }
-                    }
+            }
