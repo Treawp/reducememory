@@ -26,7 +26,6 @@ public class ReduceMemoryMod implements ClientModInitializer {
     });
 
     private final AtomicBoolean gcRunning = new AtomicBoolean(false);
-    private int tickCounter = 0;
 
     @Override
     public void onInitializeClient() {
@@ -35,62 +34,47 @@ public class ReduceMemoryMod implements ClientModInitializer {
         LOGGER.info("[ReduceMemory] v2.0.0 Active. RAM: {}MB",
             Runtime.getRuntime().maxMemory() / (1024 * 1024));
 
-        // GC di background thread - TIDAK freeze game
+        // Auto GC background thread
         gcScheduler.scheduleAtFixedRate(() -> {
             if (!config.enableAutoGC) return;
-            Runtime r = Runtime.getRuntime();
-            long max = r.maxMemory();
-            long used = r.totalMemory() - r.freeMemory();
-            double ratio = (double) used / max;
-            double threshold = config.gcThresholdPercent / 100.0;
-
-            if (ratio >= threshold && gcRunning.compareAndSet(false, true)) {
-                try {
-                    long usedMB = used / (1024 * 1024);
-                    long maxMB = max / (1024 * 1024);
-                    LOGGER.info("[ReduceMemory] GC start - {}MB/{}MB ({}%)",
-                        usedMB, maxMB, (int)(ratio * 100));
-                    System.gc();
-                    Thread.sleep(500); // cooldown biar gak spam GC
-                    long afterMB = (r.totalMemory() - r.freeMemory()) / (1024 * 1024);
-                    LOGGER.info("[ReduceMemory] GC done - {}MB -> {}MB", usedMB, afterMB);
-                } catch (InterruptedException ignored) {
-                } finally {
-                    gcRunning.set(false);
-                }
-            }
+            triggerGCIfNeeded(config.gcThresholdPercent / 100.0, false);
         }, 5, config.gcIntervalSeconds, TimeUnit.SECONDS);
 
-        // Low memory emergency GC
+        // Emergency GC background thread
         gcScheduler.scheduleAtFixedRate(() -> {
             if (!config.gcOnLowMemory) return;
-            Runtime r = Runtime.getRuntime();
-            double ratio = (double)(r.totalMemory() - r.freeMemory()) / r.maxMemory() * 100;
-            if (ratio >= config.lowMemoryThreshold && gcRunning.compareAndSet(false, true)) {
-                try {
-                    LOGGER.info("[ReduceMemory] Emergency GC! {}%", (int)ratio);
-                    System.gc();
-                    Thread.sleep(1000);
-                } catch (InterruptedException ignored) {
-                } finally {
-                    gcRunning.set(false);
-                }
-            }
+            triggerGCIfNeeded(config.lowMemoryThreshold / 100.0, true);
         }, 10, 5, TimeUnit.SECONDS);
 
-        ClientTickEvents.END_CLIENT_TICK.register(client -> {
-            // Tick counter buat logging doang, GC udah di background
-            tickCounter++;
-            if (tickCounter >= 200) {
-                tickCounter = 0;
-                if (config.reduceCpuLoad) {
-                    try { Thread.sleep(2); } catch (InterruptedException ignored) {}
-                }
+        // Main tick - TIDAK ada Thread.sleep sama sekali
+        ClientTickEvents.END_CLIENT_TICK.register(client -> {});
+    }
+
+    private void triggerGCIfNeeded(double threshold, boolean emergency) {
+        Runtime r = Runtime.getRuntime();
+        long max = r.maxMemory();
+        long used = r.totalMemory() - r.freeMemory();
+        double ratio = (double) used / max;
+
+        if (ratio >= threshold && gcRunning.compareAndSet(false, true)) {
+            try {
+                long usedMB = used / (1024 * 1024);
+                long maxMB = max / (1024 * 1024);
+                LOGGER.info("[ReduceMemory] {} GC - {}MB/{}MB ({}%)",
+                    emergency ? "Emergency" : "Auto",
+                    usedMB, maxMB, (int)(ratio * 100));
+                System.gc();
+                Thread.sleep(500);
+                long afterMB = (r.totalMemory() - r.freeMemory()) / (1024 * 1024);
+                LOGGER.info("[ReduceMemory] GC done - {}MB -> {}MB", usedMB, afterMB);
+            } catch (InterruptedException ignored) {
+            } finally {
+                gcRunning.set(false);
             }
-        });
+        }
     }
 
     public static ModConfig getConfig() {
         return config;
     }
-                                                              }
+            }
