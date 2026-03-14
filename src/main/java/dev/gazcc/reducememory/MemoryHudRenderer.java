@@ -11,83 +11,67 @@ public class MemoryHudRenderer {
     private static boolean dragging = false;
     private static int dragOffsetX = 0;
     private static int dragOffsetY = 0;
-    private static final int HUD_WIDTH = 120;
-    private static final int HUD_HEIGHT = 32;
+    private static final int W = 120;
+    private static final int H = 32;
 
     public static void register() {
         HudRenderCallback.EVENT.register(MemoryHudRenderer::render);
     }
 
-    private static void render(GuiGraphics context, DeltaTracker tickCounter) {
-        ModConfig config = ReduceMemoryMod.getConfig();
-        if (config == null || !config.showMemoryHud) return;
-
-        Minecraft client = Minecraft.getInstance();
-        if (client.options.hideGui) return;
+    private static void render(GuiGraphics ctx, DeltaTracker dt) {
+        ModConfig cfg = ReduceMemoryMod.getConfig();
+        if (cfg == null || !cfg.showMemoryHud) return;
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.options.hideGui) return;
 
         Runtime r = Runtime.getRuntime();
         long max = r.maxMemory() / (1024 * 1024);
         long used = (r.totalMemory() - r.freeMemory()) / (1024 * 1024);
         double ratio = (double) used / max;
+        int x = cfg.hudX;
+        int y = cfg.hudY;
 
-        int x = config.hudX;
-        int y = config.hudY;
+        ctx.fill(x, y, x + W, y + H, 0xAA000000);
+        ctx.drawString(mc.font, "\u00a7b[RM] Memory", x + 4, y + 4, 0xFFFFFF);
 
-        context.fill(x, y, x + HUD_WIDTH, y + HUD_HEIGHT, 0xAA000000);
+        int col = ratio > 0.85 ? 0xFF4444 : ratio > 0.65 ? 0xFFAA00 : 0x55FF55;
+        ctx.drawString(mc.font, used + "MB / " + max + "MB", x + 4, y + 14, col);
 
-        context.drawString(
-            client.font,
-            "\u00a7b[RM] Memory",
-            x + 4, y + 4, 0xFFFFFF
-        );
-
-        int color = ratio > 0.85 ? 0xFF4444 : ratio > 0.65 ? 0xFFAA00 : 0x55FF55;
-        context.drawString(
-            client.font,
-            used + "MB / " + max + "MB",
-            x + 4, y + 14, color
-        );
-
-        if (config.showMemoryBar) {
-            int barY = y + HUD_HEIGHT - 5;
-            int barWidth = HUD_WIDTH - 8;
-            context.fill(x + 4, barY, x + 4 + barWidth, barY + 3, 0xFF333333);
-            int fillWidth = (int)(barWidth * ratio);
-            int barColor = ratio > 0.85 ? 0xFFFF4444 : ratio > 0.65 ? 0xFFFFAA00 : 0xFF55FF55;
-            context.fill(x + 4, barY, x + 4 + fillWidth, barY + 3, barColor);
+        if (cfg.showMemoryBar) {
+            int by = y + H - 5;
+            int bw = W - 8;
+            ctx.fill(x + 4, by, x + 4 + bw, by + 3, 0xFF333333);
+            int fw = (int)(bw * ratio);
+            int bc = ratio > 0.85 ? 0xFFFF4444 : ratio > 0.65 ? 0xFFFFAA00 : 0xFF55FF55;
+            ctx.fill(x + 4, by, x + 4 + fw, by + 3, bc);
         }
     }
 
-    public static boolean onMouseClick(double mouseX, double mouseY, int button) {
-        ModConfig config = ReduceMemoryMod.getConfig();
-        if (config == null || !config.showMemoryHud) return false;
-        int x = config.hudX;
-        int y = config.hudY;
-        if (mouseX >= x && mouseX <= x + HUD_WIDTH &&
-            mouseY >= y && mouseY <= y + HUD_HEIGHT && button == 0) {
+    public static boolean onMouseClick(double mx, double my, int btn) {
+        ModConfig cfg = ReduceMemoryMod.getConfig();
+        if (cfg == null || !cfg.showMemoryHud) return false;
+        if (mx >= cfg.hudX && mx <= cfg.hudX + W && my >= cfg.hudY && my <= cfg.hudY + H && btn == 0) {
             dragging = true;
-            dragOffsetX = (int) mouseX - x;
-            dragOffsetY = (int) mouseY - y;
+            dragOffsetX = (int) mx - cfg.hudX;
+            dragOffsetY = (int) my - cfg.hudY;
             return true;
         }
         return false;
     }
 
-    public static void onMouseRelease(int button) {
-        if (button == 0) dragging = false;
+    public static void onMouseRelease(int btn) {
+        if (btn == 0) dragging = false;
     }
 
-    public static void onMouseDrag(double mouseX, double mouseY) {
+    public static void onMouseDrag(double mx, double my) {
         if (!dragging) return;
-        ModConfig config = ReduceMemoryMod.getConfig();
-        if (config == null) return;
-        Minecraft client = Minecraft.getInstance();
-        int screenW = client.getWindow().getGuiScaledWidth();
-        int screenH = client.getWindow().getGuiScaledHeight();
-        config.hudX = (int) Math.max(0, Math.min(mouseX - dragOffsetX, screenW - HUD_WIDTH));
-        config.hudY = (int) Math.max(0, Math.min(mouseY - dragOffsetY, screenH - HUD_HEIGHT));
+        ModConfig cfg = ReduceMemoryMod.getConfig();
+        if (cfg == null) return;
+        Minecraft mc = Minecraft.getInstance();
+        int sw = mc.getWindow().getGuiScaledWidth();
+        int sh = mc.getWindow().getGuiScaledHeight();
+        cfg.hudX = (int) Math.max(0, Math.min(mx - dragOffsetX, sw - W));
+        cfg.hudY = (int) Math.max(0, Math.min(my - dragOffsetY, sh - H));
         AutoConfig.getConfigHolder(ModConfig.class).save();
     }
-            }lass).save();
-    }
-          }
+                     }
