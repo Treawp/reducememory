@@ -7,11 +7,16 @@
   "text.autoconfig.reducememory.option.showGCNotification": "Show GC Notification",
   "text.autoconfig.reducememory.option.reduceCpuLoad": "Reduce CPU Load",
   "text.autoconfig.reducememory.option.reduceGpuLoad": "Reduce GPU Load",
-  "text.autoconfig.reducememory.option.maxFpsOnBackground": "Max FPS when Tabbed Out",
+  "text.autoconfig.reducememory.option.maxFpsOnBackground": "Max FPS Background",
   "text.autoconfig.reducememory.option.entityCulling": "Entity Culling",
   "text.autoconfig.reducememory.option.improveChunkLoading": "Improve Chunk Loading",
-  "text.autoconfig.reducememory.option.maxChunkUpdatesPerTick": "Max Chunk Updates Per Tick",
+  "text.autoconfig.reducememory.option.maxChunkUpdatesPerTick": "Max Chunk Updates/Tick",
   "text.autoconfig.reducememory.option.reduceParticles": "Reduce Particles",
   "text.autoconfig.reducememory.option.gcOnLowMemory": "GC on Low Memory",
-  "text.autoconfig.reducememory.option.lowMemoryThreshold": "Low Memory Threshold (%)"
+  "text.autoconfig.reducememory.option.lowMemoryThreshold": "Low Memory Threshold (%)",
+  "text.autoconfig.reducememory.option.showMemoryHud": "Show Memory HUD",
+  "text.autoconfig.reducememory.option.showMemoryBar": "Show Memory Bar",
+  "text.autoconfig.reducememory.option.chunkUnloadBoost": "Chunk Unload Boost",
+  "text.autoconfig.reducememory.option.chunkUnloadThreshold": "Chunk Unload Threshold (%)",
+  "text.autoconfig.reducememory.option.memoryPreset": "Memory Preset (LOW/MEDIUM/HIGH)"
 }
