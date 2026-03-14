@@ -36,6 +36,9 @@ public class ReduceMemoryMod implements ClientModInitializer {
             Runtime.getRuntime().maxMemory() / (1024 * 1024),
             config.memoryPreset);
 
+        // Register HUD
+        MemoryHudRenderer.register();
+
         // Auto GC
         gcScheduler.scheduleAtFixedRate(() -> {
             if (!config.enableAutoGC) return;
@@ -54,7 +57,7 @@ public class ReduceMemoryMod implements ClientModInitializer {
             Runtime r = Runtime.getRuntime();
             double ratio = (double)(r.totalMemory() - r.freeMemory()) / r.maxMemory() * 100;
             if (ratio >= config.chunkUnloadThreshold) {
-                LOGGER.info("[ReduceMemory] Chunk unload boost triggered {}%", (int)ratio);
+                LOGGER.info("[ReduceMemory] Chunk unload boost {}%", (int)ratio);
                 System.gc();
             }
         }, 15, 8, TimeUnit.SECONDS);
@@ -90,4 +93,4 @@ public class ReduceMemoryMod implements ClientModInitializer {
     public static ModConfig getConfig() {
         return config;
     }
-                }
+            }
