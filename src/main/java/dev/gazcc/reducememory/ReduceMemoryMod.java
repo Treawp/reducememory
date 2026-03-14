@@ -31,22 +31,35 @@ public class ReduceMemoryMod implements ClientModInitializer {
     public void onInitializeClient() {
         AutoConfig.register(ModConfig.class, GsonConfigSerializer::new);
         config = AutoConfig.getConfigHolder(ModConfig.class).getConfig();
-        LOGGER.info("[ReduceMemory] v2.0.0 Active. RAM: {}MB",
-            Runtime.getRuntime().maxMemory() / (1024 * 1024));
+        config.applyPreset();
+        LOGGER.info("[ReduceMemory] v2.0.0 Active. RAM: {}MB preset: {}",
+            Runtime.getRuntime().maxMemory() / (1024 * 1024),
+            config.memoryPreset);
 
-        // Auto GC background thread
+        // Auto GC
         gcScheduler.scheduleAtFixedRate(() -> {
             if (!config.enableAutoGC) return;
             triggerGCIfNeeded(config.gcThresholdPercent / 100.0, false);
         }, 5, config.gcIntervalSeconds, TimeUnit.SECONDS);
 
-        // Emergency GC background thread
+        // Emergency GC
         gcScheduler.scheduleAtFixedRate(() -> {
             if (!config.gcOnLowMemory) return;
             triggerGCIfNeeded(config.lowMemoryThreshold / 100.0, true);
         }, 10, 5, TimeUnit.SECONDS);
 
-        // Main tick - TIDAK ada Thread.sleep sama sekali
+        // Chunk Unload Boost
+        gcScheduler.scheduleAtFixedRate(() -> {
+            if (!config.chunkUnloadBoost) return;
+            Runtime r = Runtime.getRuntime();
+            double ratio = (double)(r.totalMemory() - r.freeMemory()) / r.maxMemory() * 100;
+            if (ratio >= config.chunkUnloadThreshold) {
+                LOGGER.info("[ReduceMemory] Chunk unload boost triggered {}%", (int)ratio);
+                System.gc();
+            }
+        }, 15, 8, TimeUnit.SECONDS);
+
+        // Main tick - ZERO blocking
         ClientTickEvents.END_CLIENT_TICK.register(client -> {});
     }
 
@@ -77,4 +90,4 @@ public class ReduceMemoryMod implements ClientModInitializer {
     public static ModConfig getConfig() {
         return config;
     }
-            }
+                }
