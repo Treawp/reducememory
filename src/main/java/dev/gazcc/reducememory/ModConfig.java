@@ -44,6 +44,10 @@ public class ModConfig implements ConfigData {
 
     public MemoryPreset memoryPreset = MemoryPreset.MEDIUM;
 
+    // HUD position
+    public int hudX = 2;
+    public int hudY = 2;
+
     public enum MemoryPreset {
         LOW, MEDIUM, HIGH
     }
@@ -70,7 +74,7 @@ public class ModConfig implements ConfigData {
                 reduceGpuLoad = false;
                 chunkUnloadBoost = false;
                 break;
-            default: // MEDIUM
+            default:
                 gcIntervalSeconds = 10;
                 gcThresholdPercent = 80;
                 lowMemoryThreshold = 85;
