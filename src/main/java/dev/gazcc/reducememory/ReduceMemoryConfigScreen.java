@@ -9,8 +9,7 @@ import net.minecraft.network.chat.Component;
 public class ReduceMemoryConfigScreen extends Screen {
 
     private final Screen parent;
-    private int activeTab = 0; // 0=Memory, 1=CPU, 2=GPU
-    private static final String[] TABS = {"Memory", "CPU", "GPU"};
+    private int activeTab = 0;
 
     public ReduceMemoryConfigScreen(Screen parent) {
         super(Component.literal("ReduceMemory Settings"));
@@ -22,90 +21,98 @@ public class ReduceMemoryConfigScreen extends Screen {
         super.init();
 
         // Tab buttons
-        for (int i = 0; i < TABS.length; i++) {
-            final int idx = i;
-            this.addRenderableWidget(Button.builder(
-                Component.literal(TABS[i]),
-                btn -> { activeTab = idx; rebuildWidgets(); }
-            ).bounds(10 + i * 70, 20, 65, 20).build());
-        }
+        this.addRenderableWidget(Button.builder(
+            Component.literal("§eMemory"),
+            btn -> { activeTab = 0; clearWidgets(); init(); }
+        ).bounds(10, 20, 65, 20).build());
+
+        this.addRenderableWidget(Button.builder(
+            Component.literal("§bCPU"),
+            btn -> { activeTab = 1; clearWidgets(); init(); }
+        ).bounds(80, 20, 65, 20).build());
+
+        this.addRenderableWidget(Button.builder(
+            Component.literal("§aGPU"),
+            btn -> { activeTab = 2; clearWidgets(); init(); }
+        ).bounds(150, 20, 65, 20).build());
 
         ModConfig cfg = ReduceMemoryMod.getConfig();
+        int cx = width / 2 - 100;
 
         if (activeTab == 0) {
-            // Memory tab
-            addToggleButton("Auto GC: " + (cfg.enableAutoGC ? "ON" : "OFF"), 50, btn -> {
-                cfg.enableAutoGC = !cfg.enableAutoGC;
-                save(); rebuildWidgets();
+            addBtn("Auto GC: " + on(cfg.enableAutoGC), cx, 55, btn -> {
+                cfg.enableAutoGC = !cfg.enableAutoGC; save();
+                btn.setMessage(Component.literal("Auto GC: " + on(cfg.enableAutoGC)));
             });
-            addToggleButton("GC on Disconnect: " + (cfg.gcOnDisconnect ? "ON" : "OFF"), 80, btn -> {
-                cfg.gcOnDisconnect = !cfg.gcOnDisconnect;
-                save(); rebuildWidgets();
+            addBtn("GC on Disconnect: " + on(cfg.gcOnDisconnect), cx, 80, btn -> {
+                cfg.gcOnDisconnect = !cfg.gcOnDisconnect; save();
+                btn.setMessage(Component.literal("GC on Disconnect: " + on(cfg.gcOnDisconnect)));
             });
-            addToggleButton("GC on Low Memory: " + (cfg.gcOnLowMemory ? "ON" : "OFF"), 110, btn -> {
-                cfg.gcOnLowMemory = !cfg.gcOnLowMemory;
-                save(); rebuildWidgets();
+            addBtn("GC on Low Memory: " + on(cfg.gcOnLowMemory), cx, 105, btn -> {
+                cfg.gcOnLowMemory = !cfg.gcOnLowMemory; save();
+                btn.setMessage(Component.literal("GC on Low Memory: " + on(cfg.gcOnLowMemory)));
             });
-            addToggleButton("Show Memory HUD: " + (cfg.showMemoryHud ? "ON" : "OFF"), 140, btn -> {
-                cfg.showMemoryHud = !cfg.showMemoryHud;
-                save(); rebuildWidgets();
+            addBtn("Memory HUD: " + on(cfg.showMemoryHud), cx, 130, btn -> {
+                cfg.showMemoryHud = !cfg.showMemoryHud; save();
+                btn.setMessage(Component.literal("Memory HUD: " + on(cfg.showMemoryHud)));
             });
-            addToggleButton("Show Memory Bar: " + (cfg.showMemoryBar ? "ON" : "OFF"), 170, btn -> {
-                cfg.showMemoryBar = !cfg.showMemoryBar;
-                save(); rebuildWidgets();
+            addBtn("Memory Bar: " + on(cfg.showMemoryBar), cx, 155, btn -> {
+                cfg.showMemoryBar = !cfg.showMemoryBar; save();
+                btn.setMessage(Component.literal("Memory Bar: " + on(cfg.showMemoryBar)));
             });
-            addToggleButton("Chunk Unload Boost: " + (cfg.chunkUnloadBoost ? "ON" : "OFF"), 200, btn -> {
-                cfg.chunkUnloadBoost = !cfg.chunkUnloadBoost;
-                save(); rebuildWidgets();
+            addBtn("Chunk Unload Boost: " + on(cfg.chunkUnloadBoost), cx, 180, btn -> {
+                cfg.chunkUnloadBoost = !cfg.chunkUnloadBoost; save();
+                btn.setMessage(Component.literal("Chunk Unload Boost: " + on(cfg.chunkUnloadBoost)));
             });
-            addToggleButton("Preset: " + cfg.memoryPreset.name(), 230, btn -> {
+            addBtn("Preset: " + cfg.memoryPreset.name(), cx, 205, btn -> {
                 ModConfig.MemoryPreset[] vals = ModConfig.MemoryPreset.values();
-                int next = (cfg.memoryPreset.ordinal() + 1) % vals.length;
-                cfg.memoryPreset = vals[next];
-                cfg.applyPreset();
-                save(); rebuildWidgets();
+                cfg.memoryPreset = vals[(cfg.memoryPreset.ordinal() + 1) % vals.length];
+                cfg.applyPreset(); save();
+                btn.setMessage(Component.literal("Preset: " + cfg.memoryPreset.name()));
             });
         } else if (activeTab == 1) {
-            // CPU tab
-            addToggleButton("Reduce CPU Load: " + (cfg.reduceCpuLoad ? "ON" : "OFF"), 50, btn -> {
-                cfg.reduceCpuLoad = !cfg.reduceCpuLoad;
-                save(); rebuildWidgets();
+            addBtn("Reduce CPU Load: " + on(cfg.reduceCpuLoad), cx, 55, btn -> {
+                cfg.reduceCpuLoad = !cfg.reduceCpuLoad; save();
+                btn.setMessage(Component.literal("Reduce CPU Load: " + on(cfg.reduceCpuLoad)));
             });
-            addToggleButton("Improve Chunk Loading: " + (cfg.improveChunkLoading ? "ON" : "OFF"), 80, btn -> {
-                cfg.improveChunkLoading = !cfg.improveChunkLoading;
-                save(); rebuildWidgets();
+            addBtn("Improve Chunk Loading: " + on(cfg.improveChunkLoading), cx, 80, btn -> {
+                cfg.improveChunkLoading = !cfg.improveChunkLoading; save();
+                btn.setMessage(Component.literal("Improve Chunk Loading: " + on(cfg.improveChunkLoading)));
             });
-            addToggleButton("Entity Culling: " + (cfg.entityCulling ? "ON" : "OFF"), 110, btn -> {
-                cfg.entityCulling = !cfg.entityCulling;
-                save(); rebuildWidgets();
+            addBtn("Entity Culling: " + on(cfg.entityCulling), cx, 105, btn -> {
+                cfg.entityCulling = !cfg.entityCulling; save();
+                btn.setMessage(Component.literal("Entity Culling: " + on(cfg.entityCulling)));
             });
-            addToggleButton("Reduce Particles: " + (cfg.reduceParticles ? "ON" : "OFF"), 140, btn -> {
-                cfg.reduceParticles = !cfg.reduceParticles;
-                save(); rebuildWidgets();
+            addBtn("Reduce Particles: " + on(cfg.reduceParticles), cx, 130, btn -> {
+                cfg.reduceParticles = !cfg.reduceParticles; save();
+                btn.setMessage(Component.literal("Reduce Particles: " + on(cfg.reduceParticles)));
             });
         } else {
-            // GPU tab
-            addToggleButton("Reduce GPU Load: " + (cfg.reduceGpuLoad ? "ON" : "OFF"), 50, btn -> {
-                cfg.reduceGpuLoad = !cfg.reduceGpuLoad;
-                save(); rebuildWidgets();
+            addBtn("Reduce GPU Load: " + on(cfg.reduceGpuLoad), cx, 55, btn -> {
+                cfg.reduceGpuLoad = !cfg.reduceGpuLoad; save();
+                btn.setMessage(Component.literal("Reduce GPU Load: " + on(cfg.reduceGpuLoad)));
             });
-            addToggleButton("Max BG FPS: " + cfg.maxFpsOnBackground, 80, btn -> {
+            addBtn("Max BG FPS: " + cfg.maxFpsOnBackground, cx, 80, btn -> {
                 cfg.maxFpsOnBackground = cfg.maxFpsOnBackground >= 60 ? 1 : cfg.maxFpsOnBackground + 5;
-                save(); rebuildWidgets();
+                save();
+                btn.setMessage(Component.literal("Max BG FPS: " + cfg.maxFpsOnBackground));
             });
         }
 
-        // Back button
         this.addRenderableWidget(Button.builder(
             Component.literal("Back"),
             btn -> this.minecraft.setScreen(parent)
         ).bounds(width / 2 - 50, height - 30, 100, 20).build());
     }
 
-    private void addToggleButton(String label, int y, Button.OnPress action) {
+    private void addBtn(String label, int x, int y, Button.OnPress action) {
         this.addRenderableWidget(Button.builder(
             Component.literal(label), action
-        ).bounds(width / 2 - 100, y, 200, 20).build());
+        ).bounds(x, y, 200, 20).build());
+    }
+
+    private String on(boolean val) {
+        return val ? "§aON" : "§cOFF";
     }
 
     private void save() {
@@ -115,7 +122,13 @@ public class ReduceMemoryConfigScreen extends Screen {
     @Override
     public void render(GuiGraphics ctx, int mouseX, int mouseY, float delta) {
         this.renderBackground(ctx, mouseX, mouseY, delta);
-        ctx.drawCenteredString(this.font, "ReduceMemory Settings", this.width / 2, 5, 0xFFFFFF);
+        ctx.drawCenteredString(this.font, "§6ReduceMemory Settings", this.width / 2, 5, 0xFFFFFF);
+        String[] descs = {
+            "§eMemory: GC settings & HUD",
+            "§bCPU: Load reduction & chunks",
+            "§aGPU: Frame rate settings"
+        };
+        ctx.drawString(this.font, descs[activeTab], 10, height - 45, 0xAAAAAA);
         super.render(ctx, mouseX, mouseY, delta);
     }
 
@@ -123,4 +136,4 @@ public class ReduceMemoryConfigScreen extends Screen {
     public void onClose() {
         this.minecraft.setScreen(parent);
     }
-                                     }
+            }
