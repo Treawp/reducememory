@@ -19,8 +19,8 @@ public class ReduceMemoryConfigScreen extends Screen {
     @Override
     protected void init() {
         super.init();
+        int cx = width / 2 - 100;
 
-        // Tab buttons
         this.addRenderableWidget(Button.builder(
             Component.literal("§eMemory"),
             btn -> { activeTab = 0; clearWidgets(); init(); }
@@ -37,7 +37,6 @@ public class ReduceMemoryConfigScreen extends Screen {
         ).bounds(150, 20, 65, 20).build());
 
         ModConfig cfg = ReduceMemoryMod.getConfig();
-        int cx = width / 2 - 100;
 
         if (activeTab == 0) {
             addBtn("Auto GC: " + on(cfg.enableAutoGC), cx, 55, btn -> {
@@ -109,6 +108,33 @@ public class ReduceMemoryConfigScreen extends Screen {
         this.addRenderableWidget(Button.builder(
             Component.literal(label), action
         ).bounds(x, y, 200, 20).build());
+    }
+
+    private String on(boolean val) {
+        return val ? "§aON" : "§cOFF";
+    }
+
+    private void save() {
+        AutoConfig.getConfigHolder(ModConfig.class).save();
+    }
+
+    @Override
+    public void render(GuiGraphics ctx, int mouseX, int mouseY, float delta) {
+        super.render(ctx, mouseX, mouseY, delta);
+        ctx.drawCenteredString(this.font, "§6ReduceMemory Settings", this.width / 2, 5, 0xFFFFFF);
+        String[] descs = {
+            "§eMemory: GC settings & HUD",
+            "§bCPU: Load reduction & chunks",
+            "§aGPU: Frame rate settings"
+        };
+        ctx.drawString(this.font, descs[activeTab], 10, height - 45, 0xAAAAAA);
+    }
+
+    @Override
+    public void onClose() {
+        this.minecraft.setScreen(parent);
+    }
+                               }        ).bounds(x, y, 200, 20).build());
     }
 
     private String on(boolean val) {
