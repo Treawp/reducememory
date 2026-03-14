@@ -35,20 +35,51 @@ public class ModConfig implements ConfigData {
     @ConfigEntry.BoundedDiscrete(min = 10, max = 90)
     public int lowMemoryThreshold = 85;
 
-    // Memory HUD
     public boolean showMemoryHud = true;
     public boolean showMemoryBar = true;
-
-    // Chunk Unload Boost
     public boolean chunkUnloadBoost = true;
 
     @ConfigEntry.BoundedDiscrete(min = 50, max = 95)
     public int chunkUnloadThreshold = 75;
 
-    // Memory Preset
     public MemoryPreset memoryPreset = MemoryPreset.MEDIUM;
 
     public enum MemoryPreset {
         LOW, MEDIUM, HIGH
+    }
+
+    public void applyPreset() {
+        switch (memoryPreset) {
+            case LOW:
+                gcIntervalSeconds = 5;
+                gcThresholdPercent = 60;
+                lowMemoryThreshold = 70;
+                chunkUnloadThreshold = 60;
+                maxChunkUpdatesPerTick = 2;
+                reduceCpuLoad = true;
+                reduceGpuLoad = true;
+                chunkUnloadBoost = true;
+                break;
+            case HIGH:
+                gcIntervalSeconds = 30;
+                gcThresholdPercent = 90;
+                lowMemoryThreshold = 90;
+                chunkUnloadThreshold = 88;
+                maxChunkUpdatesPerTick = 8;
+                reduceCpuLoad = false;
+                reduceGpuLoad = false;
+                chunkUnloadBoost = false;
+                break;
+            default: // MEDIUM
+                gcIntervalSeconds = 10;
+                gcThresholdPercent = 80;
+                lowMemoryThreshold = 85;
+                chunkUnloadThreshold = 75;
+                maxChunkUpdatesPerTick = 4;
+                reduceCpuLoad = true;
+                reduceGpuLoad = true;
+                chunkUnloadBoost = true;
+                break;
+        }
     }
     }
