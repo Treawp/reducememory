@@ -5,14 +5,18 @@ import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.DeltaTracker;
+import com.sun.management.OperatingSystemMXBean;
+import java.lang.management.ManagementFactory;
 
 public class MemoryHudRenderer {
 
     private static boolean dragging = false;
     private static int dragOffsetX = 0;
     private static int dragOffsetY = 0;
-    private static final int W = 120;
-    private static final int H = 32;
+    private static final int W = 80;
+    private static final int H = 52;
+    private static final OperatingSystemMXBean osBean =
+        (OperatingSystemMXBean) ManagementFactory.getOperatingSystemMXBean();
 
     public static void register() {
         HudRenderCallback.EVENT.register(MemoryHudRenderer::render);
@@ -27,22 +31,39 @@ public class MemoryHudRenderer {
         Runtime r = Runtime.getRuntime();
         long max = r.maxMemory() / (1024 * 1024);
         long used = (r.totalMemory() - r.freeMemory()) / (1024 * 1024);
-        double ratio = (double) used / max;
+        int memPct = (int)((double) used / max * 100);
+        int fps = mc.getFps();
+        int cpu = (int)(osBean.getCpuLoad() * 100);
+        if (cpu < 0) cpu = 0;
+
         int x = cfg.hudX;
         int y = cfg.hudY;
 
-        ctx.fill(x, y, x + W, y + H, 0xAA000000);
-        ctx.drawString(mc.font, "\u00a7b[RM] Memory", x + 4, y + 4, 0xFFFFFF);
+        // Background
+        ctx.fill(x, y, x + W, y + H, 0xBB000000);
 
-        int col = ratio > 0.85 ? 0xFF4444 : ratio > 0.65 ? 0xFFAA00 : 0x55FF55;
-        ctx.drawString(mc.font, used + "MB / " + max + "MB", x + 4, y + 14, col);
+        // M: memory%
+        int mCol = memPct > 85 ? 0xFF4444 : memPct > 65 ? 0xFFAA00 : 0x55FF55;
+        ctx.drawString(mc.font, "\u00a7fM:\u00a7" + (memPct > 85 ? "c" : memPct > 65 ? "6" : "a") + memPct + "%", x + 4, y + 4, mCol);
 
+        // F: fps
+        int fCol = fps < 15 ? 0xFF4444 : fps < 30 ? 0xFFAA00 : 0x55FF55;
+        ctx.drawString(mc.font, "\u00a7fF:\u00a7" + (fps < 15 ? "c" : fps < 30 ? "6" : "a") + fps, x + 4, y + 14, fCol);
+
+        // C: cpu%
+        int cCol = cpu > 85 ? 0xFF4444 : cpu > 60 ? 0xFFAA00 : 0x55FF55;
+        ctx.drawString(mc.font, "\u00a7fC:\u00a7" + (cpu > 85 ? "c" : cpu > 60 ? "6" : "a") + cpu + "%", x + 4, y + 24, cCol);
+
+        // G: gpu (N/A karena API ga ada)
+        ctx.drawString(mc.font, "\u00a7fG:\u00a7aN/A", x + 4, y + 34, 0xAAAAAA);
+
+        // Bar memory
         if (cfg.showMemoryBar) {
             int by = y + H - 5;
             int bw = W - 8;
             ctx.fill(x + 4, by, x + 4 + bw, by + 3, 0xFF333333);
-            int fw = (int)(bw * ratio);
-            int bc = ratio > 0.85 ? 0xFFFF4444 : ratio > 0.65 ? 0xFFFFAA00 : 0xFF55FF55;
+            int fw = (int)(bw * memPct / 100.0);
+            int bc = memPct > 85 ? 0xFFFF4444 : memPct > 65 ? 0xFFFFAA00 : 0xFF55FF55;
             ctx.fill(x + 4, by, x + 4 + fw, by + 3, bc);
         }
     }
@@ -50,7 +71,8 @@ public class MemoryHudRenderer {
     public static boolean onMouseClick(double mx, double my, int btn) {
         ModConfig cfg = ReduceMemoryMod.getConfig();
         if (cfg == null || !cfg.showMemoryHud) return false;
-        if (mx >= cfg.hudX && mx <= cfg.hudX + W && my >= cfg.hudY && my <= cfg.hudY + H && btn == 0) {
+        if (mx >= cfg.hudX && mx <= cfg.hudX + W &&
+            my >= cfg.hudY && my <= cfg.hudY + H && btn == 0) {
             dragging = true;
             dragOffsetX = (int) mx - cfg.hudX;
             dragOffsetY = (int) my - cfg.hudY;
@@ -74,4 +96,4 @@ public class MemoryHudRenderer {
         cfg.hudY = (int) Math.max(0, Math.min(my - dragOffsetY, sh - H));
         AutoConfig.getConfigHolder(ModConfig.class).save();
     }
-                     }
+    }
