@@ -22,17 +22,17 @@ public class ReduceMemoryConfigScreen extends Screen {
         int cx = width / 2 - 100;
 
         this.addRenderableWidget(Button.builder(
-            Component.literal("§eMemory"),
+            Component.literal("Memory"),
             btn -> { activeTab = 0; clearWidgets(); init(); }
         ).bounds(10, 20, 65, 20).build());
 
         this.addRenderableWidget(Button.builder(
-            Component.literal("§bCPU"),
+            Component.literal("CPU"),
             btn -> { activeTab = 1; clearWidgets(); init(); }
         ).bounds(80, 20, 65, 20).build());
 
         this.addRenderableWidget(Button.builder(
-            Component.literal("§aGPU"),
+            Component.literal("GPU"),
             btn -> { activeTab = 2; clearWidgets(); init(); }
         ).bounds(150, 20, 65, 20).build());
 
@@ -59,9 +59,9 @@ public class ReduceMemoryConfigScreen extends Screen {
                 cfg.showMemoryBar = !cfg.showMemoryBar; save();
                 btn.setMessage(Component.literal("Memory Bar: " + on(cfg.showMemoryBar)));
             });
-            addBtn("Chunk Unload Boost: " + on(cfg.chunkUnloadBoost), cx, 180, btn -> {
+            addBtn("Chunk Unload: " + on(cfg.chunkUnloadBoost), cx, 180, btn -> {
                 cfg.chunkUnloadBoost = !cfg.chunkUnloadBoost; save();
-                btn.setMessage(Component.literal("Chunk Unload Boost: " + on(cfg.chunkUnloadBoost)));
+                btn.setMessage(Component.literal("Chunk Unload: " + on(cfg.chunkUnloadBoost)));
             });
             addBtn("Preset: " + cfg.memoryPreset.name(), cx, 205, btn -> {
                 ModConfig.MemoryPreset[] vals = ModConfig.MemoryPreset.values();
@@ -70,13 +70,13 @@ public class ReduceMemoryConfigScreen extends Screen {
                 btn.setMessage(Component.literal("Preset: " + cfg.memoryPreset.name()));
             });
         } else if (activeTab == 1) {
-            addBtn("Reduce CPU Load: " + on(cfg.reduceCpuLoad), cx, 55, btn -> {
+            addBtn("Reduce CPU: " + on(cfg.reduceCpuLoad), cx, 55, btn -> {
                 cfg.reduceCpuLoad = !cfg.reduceCpuLoad; save();
-                btn.setMessage(Component.literal("Reduce CPU Load: " + on(cfg.reduceCpuLoad)));
+                btn.setMessage(Component.literal("Reduce CPU: " + on(cfg.reduceCpuLoad)));
             });
-            addBtn("Improve Chunk Loading: " + on(cfg.improveChunkLoading), cx, 80, btn -> {
+            addBtn("Chunk Loading: " + on(cfg.improveChunkLoading), cx, 80, btn -> {
                 cfg.improveChunkLoading = !cfg.improveChunkLoading; save();
-                btn.setMessage(Component.literal("Improve Chunk Loading: " + on(cfg.improveChunkLoading)));
+                btn.setMessage(Component.literal("Chunk Loading: " + on(cfg.improveChunkLoading)));
             });
             addBtn("Entity Culling: " + on(cfg.entityCulling), cx, 105, btn -> {
                 cfg.entityCulling = !cfg.entityCulling; save();
@@ -87,9 +87,9 @@ public class ReduceMemoryConfigScreen extends Screen {
                 btn.setMessage(Component.literal("Reduce Particles: " + on(cfg.reduceParticles)));
             });
         } else {
-            addBtn("Reduce GPU Load: " + on(cfg.reduceGpuLoad), cx, 55, btn -> {
+            addBtn("Reduce GPU: " + on(cfg.reduceGpuLoad), cx, 55, btn -> {
                 cfg.reduceGpuLoad = !cfg.reduceGpuLoad; save();
-                btn.setMessage(Component.literal("Reduce GPU Load: " + on(cfg.reduceGpuLoad)));
+                btn.setMessage(Component.literal("Reduce GPU: " + on(cfg.reduceGpuLoad)));
             });
             addBtn("Max BG FPS: " + cfg.maxFpsOnBackground, cx, 80, btn -> {
                 cfg.maxFpsOnBackground = cfg.maxFpsOnBackground >= 60 ? 1 : cfg.maxFpsOnBackground + 5;
@@ -111,7 +111,7 @@ public class ReduceMemoryConfigScreen extends Screen {
     }
 
     private String on(boolean val) {
-        return val ? "§aON" : "§cOFF";
+        return val ? "ON" : "OFF";
     }
 
     private void save() {
@@ -121,11 +121,11 @@ public class ReduceMemoryConfigScreen extends Screen {
     @Override
     public void render(GuiGraphics ctx, int mouseX, int mouseY, float delta) {
         super.render(ctx, mouseX, mouseY, delta);
-        ctx.drawCenteredString(this.font, "§6ReduceMemory Settings", this.width / 2, 5, 0xFFFFFF);
+        ctx.drawCenteredString(this.font, "ReduceMemory Settings", this.width / 2, 5, 0xFFFFFF);
         String[] descs = {
-            "§eMemory: GC settings & HUD",
-            "§bCPU: Load reduction & chunks",
-            "§aGPU: Frame rate settings"
+            "Memory: GC settings and HUD",
+            "CPU: Load reduction and chunks",
+            "GPU: Frame rate settings"
         };
         ctx.drawString(this.font, descs[activeTab], 10, height - 45, 0xAAAAAA);
     }
@@ -134,32 +134,4 @@ public class ReduceMemoryConfigScreen extends Screen {
     public void onClose() {
         this.minecraft.setScreen(parent);
     }
-                               }        ).bounds(x, y, 200, 20).build());
-    }
-
-    private String on(boolean val) {
-        return val ? "§aON" : "§cOFF";
-    }
-
-    private void save() {
-        AutoConfig.getConfigHolder(ModConfig.class).save();
-    }
-
-    @Override
-    public void render(GuiGraphics ctx, int mouseX, int mouseY, float delta) {
-        this.renderBackground(ctx, mouseX, mouseY, delta);
-        ctx.drawCenteredString(this.font, "§6ReduceMemory Settings", this.width / 2, 5, 0xFFFFFF);
-        String[] descs = {
-            "§eMemory: GC settings & HUD",
-            "§bCPU: Load reduction & chunks",
-            "§aGPU: Frame rate settings"
-        };
-        ctx.drawString(this.font, descs[activeTab], 10, height - 45, 0xAAAAAA);
-        super.render(ctx, mouseX, mouseY, delta);
-    }
-
-    @Override
-    public void onClose() {
-        this.minecraft.setScreen(parent);
-    }
-            }
+                 }
